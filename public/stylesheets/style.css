@@ -3,7 +3,7 @@
   padding: 0;
 }
 html {
-  background: url("../img/bg.png") repeat #e4e4e4;
+  background: url("../images/bg.png") repeat #e4e4e4;
   overflow: hidden;
   cursor: url("images/pen.png");
 }
@@ -16,10 +16,23 @@ a:visited {
   outline: none;
   color: #43819b;
 }
-#link {
+.colorpicker {
   position: absolute;
-  top: 10px;
+  top: 25px;
   left: 20px;
+}
+#my_popup {
+  -webkit-transform: scale(0.8);
+  -moz-transform: scale(0.8);
+  -ms-transform: scale(0.8);
+  transform: scale(0.8);
+  background: #fff;
+}
+.popup_visible #my_popup {
+  -webkit-transform: scale(1);
+  -moz-transform: scale(1);
+  -ms-transform: scale(1);
+  transform: scale(1);
 }
 a:hover {
   text-decoration: none;
@@ -38,6 +51,29 @@ section,
 footer,
 header {
   display: block;
+}
+#my_popup h1 {
+  font-size: 30px;
+}
+#my_popup button {
+  float: right;
+}
+#my_popup input {
+  margin-bottom: 10px;
+}
+#close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+#users {
+  position: absolute;
+  bottom: 100px;
+  left: 10px;
+}
+.cursor_name {
+  margin-top: 15px;
+  margin-left: 12px;
 }
 hgroup {
   position: fixed;
@@ -75,7 +111,7 @@ h3 {
   position: absolute;
   width: 15px;
   height: 22px;
-  background: url("../img/pointer.png") no-repeat -4px 0;
+  background: url("../images/pointer.png") no-repeat -4px 0;
 }
 footer {
   background-color: #111;
