@@ -86,7 +86,8 @@ function handler (request, response) {
     });
 }
 
-users = [];
+var usernames = {};
+var numUsers = 0;
 
 // Delete this row if you want to see debug messages
 io.set('log level', 1);
@@ -94,20 +95,48 @@ io.set('log level', 1);
 var draw = false;
 // Listen for incoming connections from clients
 io.sockets.on('connection', function (socket) {
+  var addedUser = false;
+
+  socket.on('disconnect', function() {
+    console.log('Got disconnect from '+JSON.stringify(socket.username));
+    if ( addedUser ) {
+      delete usernames[socket.username];
+      --numUsers;
+
+      console.log('Num of users: '+numUsers);
+      // echo globally that this client has left
+      socket.broadcast.emit('user_change', {
+        usernames: usernames,
+        numUsers: numUsers
+      });
+    }
+  });
 
   socket.on('clear_clicked', function(data) {
     socket.broadcast.emit('clear', data);
   });
 
-  socket.on('user_ping', function(data) {
-    console.log("user ping");
-    console.log(contains(users, data.name));
-    if ( !contains(users, data.name) ) {
-      console.log("New user: "+data.name);
-      console.dir(users);
-      users.push(data.name);
-      socket.broadcast.emit('user',{users:users});
-    }
+  socket.on('new_user', function(name) {
+    socket.username = name.name;
+
+    usernames[socket.username] = socket.username;
+    ++numUsers;
+
+    addedUser = true;
+
+    console.log('new user!');
+      console.log('Num of users: '+numUsers);
+
+    socket.emit('user_change', {
+      usernames: usernames,
+      numUsers: numUsers
+    });
+
+    socket.broadcast.emit('user_change', {
+      usernames: usernames,
+      numUsers: numUsers
+    });
+
   });
 
 	// Start listening for mouse move events
@@ -126,12 +155,12 @@ io.sockets.on('connection', function (socket) {
         color = "black";
 
       console.log(color);
-      db.collection('canvas').save( {id:data.id, draw: true, x: data.x,y: data.y, color: color});      
+      db.collection('canvas').save( {id:data.id, draw: true, width: data.width, x: data.x,y: data.y, color: color});      
     }
     else if ( !data.drawing && draw ) {
       // console.log("2");
       draw = false;
-      db.collection('canvas').save( {draw: false});
+      db.collection('canvas').save( {id: data.id, draw: false});
       var color = data.color;
       var id = data.id;
 
@@ -165,6 +194,7 @@ io.sockets.on('connection', function (socket) {
               else if ( val.draw) {
                   ctx.strokeStyle = color;
                   console.log(prevx);
+                  ctx.lineWidth = val.width;
                   ctx.moveTo(prevx,prevy);
                   ctx.lineTo(val.x,val.y);
                   ctx.stroke();

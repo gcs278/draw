@@ -1,6 +1,18 @@
 $(document).ready(function(){
 	var name = Cookies.get("name");
 	var socket = io.connect(url);
+	var lineWidth = 3;
+
+	socket.on('user_change', function (data) {
+		console.log("user change!");
+		$('#user_list').html("");
+		console.dir(data.usernames);
+		for (var val in data.usernames ) {
+
+			if ( data.usernames[val] != name )
+				$('#user_list').append('<li>' + data.usernames[val] + '</li>');
+		}
+	});
 
 	if ( !name ) {
 		$('#my_popup').popup({
@@ -10,50 +22,39 @@ $(document).ready(function(){
 			blur: false,
 			escape: false
 		});
-		// $('#my_popup').popup('show');
-		$('#name_submit').click(function() {
-			$('#name_form').submit();
-			$('#my_popup').popup('hide');
-		});
-
-		$('#name_input').bind('keypress',function(e){
-			console.log('key press');
-			if (e.keyCode == 13) {
-				e.preventDefault();
-				$('#name_form').submit();
-			}
-		});
 
 		$('#name_form').submit(function(e) {
 			e.preventDefault();
 			name = $('#name_input').val();
 			Cookies.set("name",name);
-		});
 
-		socket.emit('new_user', {
-			name: name
+			socket.emit('new_user', {name});
+			$('#my_popup').popup('hide');
 		});
 	}
+	else {
+		socket.emit('new_user', {name});
+	}
 
-	socket.on('user', function (data) {
-		console.log("user change!");
-		console.dir(data);
-		data.users.each(function(i,val) {
-			console.log(val);
-			$('#user_list').append(val);
-		});
-	});
 
 	var color = Cookies.get("color");
 
 	$('select[name="colorpicker"]').simplecolorpicker(
 		{picker:true,theme: 'fontawesome'}).on('change', function() {
 		color = $('select[name="colorpicker"]').val();
+		$('.size_wrapper div').css("background",color);
 		Cookies.set("color",color);
 	});
+
 	if ( color ) {
 		console.log(color);
 		$('select[name="colorpicker"]').simplecolorpicker('selectColor',color);
+		$('.size_wrapper div').css("background",color);
+	}
+	else {
+		color = $('select[name="colorpicker"]').val();
+		$('.size_wrapper div').css("background-color",color);
+		Cookies.set("color",color);
 	}
 
 	// This demo depends on the canvas element
@@ -63,7 +64,8 @@ $(document).ready(function(){
 	}
 
 	// The URL of your web server (the port is set in app.js)
-	var url = 'http://draw.grantspence.com';
+	// var url = 'http://draw.grantspence.com';
+	var url = 'http://localhost:3000';
 
 	var doc = $(document),
 		win = $(window),
@@ -95,29 +97,31 @@ $(document).ready(function(){
 
 	socket.on('moving', function (data) {
 		console.log('in socket moving');
-		if(! (data.id in clients)){
-			// a new user has come online. create a cursor for them
-			cursors[data.id] = $('<div class="cursor">').html('<div class="cursor_name">'+data.name+'</div>').appendTo('#cursors');
+		if ( data.name ) {
+			if(! (data.id in clients) ){
+				// a new user has come online. create a cursor for them
+				cursors[data.id] = $('<div class="cursor">').html('<div class="cursor_name">'+data.name+'</div>').appendTo('#cursors');
+			}
+
+			// Move the mouse pointer
+			cursors[data.id].css({
+				'left' : data.x,
+				'top' : data.y
+			});
+
+			// Is the user drawing?
+			if(data.drawing && clients[data.id]){
+
+				// Draw a line on the canvas. clients[data.id] holds
+				// the previous position of this user's mouse pointer
+
+				drawLine(clients[data.id].x, clients[data.id].y, data.x, data.y, data.color);
+			}
+
+			// Saving the current client state
+			clients[data.id] = data;
+			clients[data.id].updated = $.now();
 		}
-
-		// Move the mouse pointer
-		cursors[data.id].css({
-			'left' : data.x,
-			'top' : data.y
-		});
-
-		// Is the user drawing?
-		if(data.drawing && clients[data.id]){
-
-			// Draw a line on the canvas. clients[data.id] holds
-			// the previous position of this user's mouse pointer
-
-			drawLine(clients[data.id].x, clients[data.id].y, data.x, data.y, data.color);
-		}
-
-		// Saving the current client state
-		clients[data.id] = data;
-		clients[data.id].updated = $.now();
 	});
 
 	var prev = {};
@@ -134,6 +138,15 @@ $(document).ready(function(){
 
 	doc.bind('mouseup mouseleave',function(){
 		drawing = false;
+
+		socket.emit('mousemove',{
+			'x': 0,
+			'y': 0,
+			'drawing': drawing,
+			'id': id,
+			'name': name,
+			'color': color
+		});
 	});
 
 	var lastEmit = $.now();
@@ -144,6 +157,7 @@ $(document).ready(function(){
 				'x': e.pageX,
 				'y': e.pageY,
 				'drawing': drawing,
+				'width': lineWidth,
 				'id': id,
 				'name': name,
 				'color': color
@@ -183,16 +197,29 @@ $(document).ready(function(){
 	function drawLine(fromx, fromy, tox, toy, clr){
 		ctx.strokeStyle = clr;
 		ctx.beginPath();
+		ctx.lineWidth = lineWidth;
 		ctx.moveTo(fromx, fromy);
 		ctx.lineTo(tox, toy);
 		ctx.stroke();
 	}
 
-	$('.btn').click(function(e) {
+	$('#close').click(function(e) {
 		e.preventDefault();
 		$.get("/clear");
 		socket.emit('clear_clicked');
 		ctx.clearRect(0, 0, ctx.canvas.clientWidth, ctx.canvas.clientHeight);
+	});
+
+	$('#large').click(function() {
+		lineWidth = 10;
+	});
+
+	$('#medium').click(function() {
+		lineWidth = 6;
+	});
+
+	$('#small').click(function() {
+		lineWidth = 3;
 	});
 
 	window.setInterval(function() {

@@ -40,7 +40,7 @@ html
       h1 What's your name?
       form#name_form(data-toggle="validator" role="form")
         div.form-group
-          input.form-control#name_input(required)
+          input.form-control#name_input(required maxlength="25")
         button.btn.btn-default#name_submit(type='submit') Enter
 
 
@@ -74,6 +74,13 @@ html
         option(value='#cd74e6') #cd74e6
         option(value='#000000') #000000
 
+    div#size
+        div.size_wrapper
+            div#large
+        div.size_wrapper
+            div#medium
+        div.size_wrapper
+            div#small
 
     button#close(type="button" class="btn btn-default") CLEAR
 
