@@ -9,7 +9,8 @@ html
     link(rel='stylesheet', href='/stylesheets/jquery.simplecolorpicker-fontawesome.css')
     link(rel='stylesheet', href="http://netdna.bootstrapcdn.com/font-awesome/4.0.0/css/font-awesome.css")
     link(rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css")
-
+    link(rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon")
+    link(rel="icon" href="/images/favicon.ico" type="image/x-icon")
     script(src='https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js')
     script(src='/javascripts/jquery.popupoverlay.js')
     script(src='/javascripts/js.cookie-2.0.3.min.js')
@@ -41,7 +42,22 @@ html
       form#name_form(data-toggle="validator" role="form")
         div.form-group
           input.form-control#name_input(required maxlength="25")
-        button.btn.btn-default#name_submit(type='submit') Enter
+        button.btn.btn-default#name_submit(type='submit') Let me in
+
+    div#confirm_clear.well
+      h1 Are you sure you want to clear?
+      div#buttons
+          button.btn.btn-default#yes Yes
+          button.btn.btn-default#no No
+
+    div#confirm_send.well
+      div#send
+          h1 You wanna send the current picture to Grant?
+          div#buttons
+              button.btn.btn-default#yes Yes
+              button.btn.btn-default#no No
+      div#sent
+        h1 Grant has been sent this picture!
 
 
     div#centerdiv
@@ -82,7 +98,10 @@ html
         div.size_wrapper
             div#small
 
-    button#close(type="button" class="btn btn-default") CLEAR
+    div#email
+        a#email_button() Send Grant this picture
+
+    button#clear(type="button" class="btn btn-default") CLEAR
 
     div#users
       h5 Active Users:

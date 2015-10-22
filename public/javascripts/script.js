@@ -23,13 +23,14 @@ $(document).ready(function(){
 			escape: false
 		});
 
-		$('#name_form').submit(function(e) {
-			e.preventDefault();
-			name = $('#name_input').val();
-			Cookies.set("name",name);
+		$('#name_form').validator().on('submit',function(e) {
+			if (!e.isDefaultPrevented()) {
+				name = $('#name_input').val();
+				Cookies.set("name",name);
 
-			socket.emit('new_user', {name});
-			$('#my_popup').popup('hide');
+				socket.emit('new_user', {name});
+				$('#my_popup').popup('hide');
+			}
 		});
 	}
 	else {
@@ -64,8 +65,7 @@ $(document).ready(function(){
 	}
 
 	// The URL of your web server (the port is set in app.js)
-	// var url = 'http://draw.grantspence.com';
-	var url = 'http://localhost:3000';
+	var url = document.location.host;
 
 	var doc = $(document),
 		win = $(window),
@@ -78,11 +78,6 @@ $(document).ready(function(){
 }
 	// Generate an unique ID
 	var id = Math.round($.now()*Math.random());
-	// if ( !color ) {
-		// 16777215 = ffffff
-		// color = '#'+Math.floor(Math.random()*14540253).toString(16);
-		// Cookies.set("color",color);
-	// }
 
 	// A flag for drawing activity
 	var drawing = false;
@@ -197,17 +192,52 @@ $(document).ready(function(){
 	function drawLine(fromx, fromy, tox, toy, clr){
 		ctx.strokeStyle = clr;
 		ctx.beginPath();
+		ctx.lineCap = 'round';
 		ctx.lineWidth = lineWidth;
 		ctx.moveTo(fromx, fromy);
 		ctx.lineTo(tox, toy);
 		ctx.stroke();
 	}
 
-	$('#close').click(function(e) {
+	$('#clear').click(function(e) {
 		e.preventDefault();
-		$.get("/clear");
-		socket.emit('clear_clicked');
-		ctx.clearRect(0, 0, ctx.canvas.clientWidth, ctx.canvas.clientHeight);
+		$('#confirm_clear').popup({
+			autoopen: true,
+			pagecontainer: '.container',
+			transition: 'all 0.3s',
+			blur: false,
+		});
+		$('#confirm_clear #yes').click(function() {
+			$.get("/clear");
+			$('#confirm_clear').popup('hide');
+			socket.emit('clear_clicked');
+			ctx.clearRect(0, 0, ctx.canvas.clientWidth, ctx.canvas.clientHeight);
+		});
+		$('#confirm_clear #no').click(function() {
+			$('#confirm_clear').popup('hide');
+		});
+	});
+
+	$('#email_button').click( function(e) {
+		$('#confirm_send').popup({
+			autoopen: true,
+			pagecontainer: '.container',
+			transition: 'all 0.3s',
+			blur: true,
+		});
+		$('#confirm_send #yes').click(function() {
+			$.ajax( {
+				url: '/send',
+				data: {name:name}
+			}).done(function() {
+				$("#send").hide();
+				$("#sent").show();
+			});
+		});
+		$('#confirm_send #no').click(function() {
+			$('#confirm_send').popup('hide');
+		});
+
 	});
 
 	$('#large').click(function() {

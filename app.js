@@ -195,6 +195,7 @@ io.sockets.on('connection', function (socket) {
                   ctx.strokeStyle = color;
                   console.log(prevx);
                   ctx.lineWidth = val.width;
+                  ctx.lineCap = 'round';
                   ctx.moveTo(prevx,prevy);
                   ctx.lineTo(val.x,val.y);
                   ctx.stroke();
