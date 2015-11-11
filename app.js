@@ -5,7 +5,7 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var assert = require('assert');
-
+var url = require('url');
 var routes = require('./routes/index');
 var users = require('./routes/users');
 
@@ -41,6 +41,7 @@ app.use(function(req,res,next){
 });
 
 app.use('/', routes);
+app.use('/otter', routes);
 app.use('/users', users);
 
 // catch 404 and forward to error handler
@@ -97,6 +98,10 @@ var draw = false;
 io.sockets.on('connection', function (socket) {
   var addedUser = false;
 
+  // Get path of URL
+  u = url.parse(socket.request.headers.referer)
+  var path = u.path;
+
   socket.on('disconnect', function() {
     console.log('Got disconnect from '+JSON.stringify(socket.username));
     if ( addedUser ) {
@@ -114,6 +119,7 @@ io.sockets.on('connection', function (socket) {
 
   socket.on('clear_clicked', function(data) {
     socket.broadcast.emit('clear', data);
+    db.collection('base64').remove({path:data.path});
   });
 
   socket.on('new_user', function(name) {
@@ -154,17 +160,18 @@ io.sockets.on('connection', function (socket) {
       else
         color = "black";
 
-      console.log(color);
-      db.collection('canvas').save( {id:data.id, draw: true, width: data.width, x: data.x,y: data.y, color: color});      
+      // console.log(color);
+      console.log("Logging: "+data.x+","+data.y);
+      db.collection('canvas').save( {id:data.id, draw: true, width: data.width, x: data.x,y: data.y, color: color, path: path});      
     }
     else if ( !data.drawing && draw ) {
       // console.log("2");
       draw = false;
-      db.collection('canvas').save( {id: data.id, draw: false});
+      db.collection('canvas').save( {id: data.id, draw: false, path: path});
       var color = data.color;
       var id = data.id;
 
-      db.collection('base64').findOne({},function(err,data) {
+      db.collection('base64').findOne({path:path},function(err,data) {
         // console.log("Data: " + data.base64);
 
         var Canvas = require('canvas'),
@@ -178,7 +185,7 @@ io.sockets.on('connection', function (socket) {
           ctx.drawImage(img,0,0);
         }
 
-        db.collection('canvas').find().toArray(function(err,data) {
+        db.collection('canvas').find().sort([['_id', -1]]).toArray(function(err,data) {
           var first = true;
           var prevx = 0;
           var prevy = 0;
@@ -192,15 +199,22 @@ io.sockets.on('connection', function (socket) {
                   first = false;
               }
               else if ( val.draw) {
-                  ctx.strokeStyle = color;
-                  console.log(prevx);
-                  ctx.lineWidth = val.width;
-                  ctx.lineCap = 'round';
-                  ctx.moveTo(prevx,prevy);
-                  ctx.lineTo(val.x,val.y);
-                  ctx.stroke();
-                  prevx = val.x;
-                  prevy = val.y;
+                if ( color == "rgba(0,0,0,1)" ) {
+                  ctx.globalCompositeOperation = "destination-out";
+                }
+                else {
+                  
+                }
+                console.log("Draw: "+val.x+","+val.y);
+                ctx.strokeStyle = color;
+                // console.log(prevx);
+                ctx.lineWidth = val.width;
+                ctx.lineCap = 'round';
+                ctx.moveTo(prevx,prevy);
+                ctx.lineTo(val.x,val.y);
+                ctx.stroke();
+                prevx = val.x;
+                prevy = val.y;
               }
               else if ( !val.draw ) {
                 // We're done drawing
@@ -211,8 +225,8 @@ io.sockets.on('connection', function (socket) {
 
           // Delete the last line contents
           db.collection('canvas').remove({id:id});
-          db.collection('base64').remove({});
-          db.collection('base64').insert({base64:canvas.toDataURL()});
+          db.collection('base64').remove({path:path});
+          db.collection('base64').insert({base64:canvas.toDataURL(),path:path});
         });
         console.log("2");
 

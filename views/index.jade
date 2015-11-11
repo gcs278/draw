@@ -9,18 +9,21 @@ html
     link(rel='stylesheet', href='/stylesheets/jquery.simplecolorpicker-fontawesome.css')
     link(rel='stylesheet', href="http://netdna.bootstrapcdn.com/font-awesome/4.0.0/css/font-awesome.css")
     link(rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css")
+    link(rel='stylesheet', href='/stylesheets/bootstrap-select.min.css')
     link(rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon")
     link(rel="icon" href="/images/favicon.ico" type="image/x-icon")
     script(src='https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js')
+    script(src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js', integrity='sha512-K1qjQ+NcF2TYO/eI3M6v8EiNYZfA95pQumfvcVrTHtwQVDG+aHRqLi/ETn2uB+1JqwYqVG3LIvdm9lj6imS/pQ==', crossorigin='anonymous')
     script(src='/javascripts/jquery.popupoverlay.js')
     script(src='/javascripts/js.cookie-2.0.3.min.js')
+    script(src='/javascripts/bootstrap-select.min.js')
     script(src='/javascripts/script.js')
     script(src='/javascripts/jquery.simplecolorpicker.js')
     script(src='/javascripts/validator.js')
 
+
     //if lt IE 9
       script(src='http://html5shiv.googlecode.com/svn/trunk/html5.js')
-
 
   body
     #cursors
@@ -61,7 +64,15 @@ html
 
 
     div#centerdiv
-      h1#title Draw Something!
+      if picture=='otter'
+        h1#title Otter!
+      else if picture='turtle'
+        h1#title Turtle!
+      else
+        h1#title Draw Something!
+
+    div#eraser
+        img(src="/images/eraser.png" height="25px")
 
     div.colorpicker
       select(name='colorpicker')
@@ -97,6 +108,33 @@ html
             div#medium
         div.size_wrapper
             div#small
+    
+    div.page_select
+      if picture=='otter'
+        a(href="/")
+          img(src="/images/blank.png" id="blank-select")
+        a(href="turtle")
+          img(src="/images/turtle.png" id="turtle-select")
+      else if picture == 'turtle'
+        a(href="/")
+          img(src="/images/blank.png" id="blank-select")
+        a(href="otter")
+          img(src="/images/otter.png" id="otter-select")
+      else
+        a(href="otter")
+          img(src="/images/otter.png" id="otter-select")
+        a(href="turtle")
+          img(src="/images/turtle.png" id="turtle-select")
+    //- .colorbook
+    //-   button#dropdownMenu1.btn.btn-default.dropdown-toggle(type='button', data-toggle='dropdown', aria-haspopup='true', aria-expanded='true')
+    //-     | Blank Page
+    //-     span.caret
+    //-   ul.dropdown-menu(aria-labelledby='dropdownMenu1')
+    //-     li
+    //-       a(id='otter') Otter
+    //-     li
+    //-       a(id='otter') Blank Page          
+
 
     div#email
         a#email_button() Send Grant this picture
@@ -111,6 +149,7 @@ html
 
     // JavaScript includes. Notice that socket.io.js is served by node.js
     script(src='/socket.io/socket.io.js')
+
     
 
 

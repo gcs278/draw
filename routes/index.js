@@ -8,7 +8,7 @@ router.get('/', function(req, res, next) {
   var Canvas = require('canvas'),
   canvas = new Canvas(1900, 1000),
   ctx = canvas.getContext('2d');
-  req.db.collection('base64').findOne({},function(err,data) {
+  req.db.collection('base64').findOne({path:'/'},function(err,data) {
     console.log('1');
     if(data){
         var img = new Canvas.Image;//
@@ -17,9 +17,38 @@ router.get('/', function(req, res, next) {
     }
     console.log('1');
     // console.log(data);
-    res.render('index', { title: 'Express',canvas: canvas});
+    res.render('index', { title: 'Express',canvas: canvas, picture:'grid'});
   });
 });
+
+router.get('/otter', function(req, res, next) {
+  var Canvas = require('canvas'),
+  canvas = new Canvas(1900, 1000),
+  ctx = canvas.getContext('2d');
+  req.db.collection('base64').findOne({path:'/otter'},function(err,data) {
+    if(data){
+        var img = new Canvas.Image;//
+        img.src = data.base64;
+        ctx.drawImage(img,0,0);
+    }
+    res.render('index', { title: 'Express',canvas: canvas, picture:'otter'});
+  });
+});
+
+router.get('/turtle', function(req, res, next) {
+  var Canvas = require('canvas'),
+  canvas = new Canvas(1900, 1000),
+  ctx = canvas.getContext('2d');
+  req.db.collection('base64').findOne({path:'/otter'},function(err,data) {
+    if(data){
+        var img = new Canvas.Image;//
+        img.src = data.base64;
+        ctx.drawImage(img,0,0);
+    }
+    res.render('index', { title: 'Express',canvas: canvas, picture:'turtle'});
+  });
+});
+
 
 router.get('/canvas', function(req, res) {
     var db = req.db;

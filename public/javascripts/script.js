@@ -3,6 +3,24 @@ $(document).ready(function(){
 	var socket = io.connect(url);
 	var lineWidth = 3;
 
+	var eraser = false;
+
+	var base_image = null;
+	if ( window.location.pathname == '/otter') {
+		base_image = new Image();
+		base_image.src = '/images/otter.png';
+		base_image.onload = function(){
+			ctx.drawImage(base_image, 0, 0);
+		}
+	}
+	else if ( window.location.pathname == '/turtle') {
+		base_image = new Image();
+		base_image.src = '/images/turtle.png';
+		base_image.onload = function(){
+			ctx.drawImage(base_image, 200, 180);
+		}
+	}
+
 	socket.on('user_change', function (data) {
 		console.log("user change!");
 		$('#user_list').html("");
@@ -44,6 +62,9 @@ $(document).ready(function(){
 		{picker:true,theme: 'fontawesome'}).on('change', function() {
 		color = $('select[name="colorpicker"]').val();
 		$('.size_wrapper div').css("background",color);
+		ctx.globalCompositeOperation = "source-over";
+		$('canvas').css("cursor", "auto");
+
 		Cookies.set("color",color);
 	});
 
@@ -87,12 +108,14 @@ $(document).ready(function(){
 	
 
 	socket.on('clear', function(data) {
-		ctx.clearRect(0, 0, ctx.canvas.clientWidth, ctx.canvas.clientHeight);
+		if ( data.path == window.location.pathname) {
+			ctx.clearRect(0, 0, ctx.canvas.clientWidth, ctx.canvas.clientHeight);
+		}
 	});
 
 	socket.on('moving', function (data) {
 		console.log('in socket moving');
-		if ( data.name ) {
+		if ( data.name && data.path == window.location.pathname) {
 			if(! (data.id in clients) ){
 				// a new user has come online. create a cursor for them
 				cursors[data.id] = $('<div class="cursor">').html('<div class="cursor_name">'+data.name+'</div>').appendTo('#cursors');
@@ -140,7 +163,8 @@ $(document).ready(function(){
 			'drawing': drawing,
 			'id': id,
 			'name': name,
-			'color': color
+			'color': color,
+			'path': window.location.pathname
 		});
 	});
 
@@ -155,15 +179,18 @@ $(document).ready(function(){
 				'width': lineWidth,
 				'id': id,
 				'name': name,
-				'color': color
+				'color': color,
+				'path': window.location.pathname
 			});
 			lastEmit = $.now();
 		}
 
+		
 		// Draw a line for the current user's movement, as it is
 		// not received in the socket.on('moving') event above
 
 		if(drawing){
+			console.log("x: "+e.pageX+"y: "+e.pageY);
 
 			drawLine(prev.x, prev.y, e.pageX, e.pageY, color);
 
@@ -190,6 +217,13 @@ $(document).ready(function(){
 	},10000);
 
 	function drawLine(fromx, fromy, tox, toy, clr){
+		if ( eraser ) {
+			ctx.globalCompositeOperation = "destination-out";
+			fromy+=30;
+			toy+=30;
+			tox+=5;
+			fromx+=5;
+		}
 		ctx.strokeStyle = clr;
 		ctx.beginPath();
 		ctx.lineCap = 'round';
@@ -197,6 +231,15 @@ $(document).ready(function(){
 		ctx.moveTo(fromx, fromy);
 		ctx.lineTo(tox, toy);
 		ctx.stroke();
+		ctx.globalCompositeOperation = "source-over";
+
+		if ( base_image ) {
+			if ( window.location.pathname == "/turtle")
+				ctx.drawImage(base_image, 200, 180);
+			else
+				ctx.drawImage(base_image, 0, 0);
+			
+		}
 	}
 
 	$('#clear').click(function(e) {
@@ -208,9 +251,8 @@ $(document).ready(function(){
 			blur: false,
 		});
 		$('#confirm_clear #yes').click(function() {
-			$.get("/clear");
 			$('#confirm_clear').popup('hide');
-			socket.emit('clear_clicked');
+			socket.emit('clear_clicked',{path:window.location.pathname});
 			ctx.clearRect(0, 0, ctx.canvas.clientWidth, ctx.canvas.clientHeight);
 		});
 		$('#confirm_clear #no').click(function() {
@@ -252,10 +294,31 @@ $(document).ready(function(){
 		lineWidth = 3;
 	});
 
+	$('#eraser img').click(function() {
+		eraser = true;
+		ctx.globalCompositeOperation = "destination-out";
+		color = "rgba(0,0,0,1)";
+		lineWidth = 6;
+		$('canvas').css("cursor", "url('../images/eraser.png'), auto");
+	});
+
 	window.setInterval(function() {
 		socket.emit('user_ping',{
 			name:name
 		});
 	}, 3000);
+
+
+	var background = 'grid';
+	$(".colorbook li a").click(function(){
+		if ( $(this).text() == 'Otter' ) {
+			console.log('her');
+			$('body').css("background","url('../images/otter.png')");
+		}
+
+		$(".btn:first-child").text($(this).text());
+		$(".btn:first-child").val($(this).text());
+	});
+
 
 });
