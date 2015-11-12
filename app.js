@@ -185,44 +185,42 @@ io.sockets.on('connection', function (socket) {
           ctx.drawImage(img,0,0);
         }
 
-        db.collection('canvas').find().sort([['_id', -1]]).toArray(function(err,data) {
+        db.collection('canvas').find().toArray(function(err,data) {
           var first = true;
           var prevx = 0;
           var prevy = 0;
 
-          if ( data )  {
-            // Draw the line on the canvas
-            data.forEach(function(val) {
-              if ( id == val.id ) {
-                if ( first && val.x && val.y ) {
-                    prevx = val.x;
-                    prevy = val.y;
-                    first = false;
-                }
-                else if ( val.draw) {
-                  if ( color == "rgba(0,0,0,1)" ) {
-                    ctx.globalCompositeOperation = "destination-out";
-                  }
-                  else {
-                    
-                  }
-                  console.log("Draw: "+val.x+","+val.y);
-                  ctx.strokeStyle = color;
-                  // console.log(prevx);
-                  ctx.lineWidth = val.width;
-                  ctx.lineCap = 'round';
-                  ctx.moveTo(prevx,prevy);
-                  ctx.lineTo(val.x,val.y);
-                  ctx.stroke();
+          // Draw the line on the canvas
+          data.forEach(function(val) {
+            if ( id == val.id ) {
+              if ( first && val.x && val.y ) {
                   prevx = val.x;
                   prevy = val.y;
-                }
-                else if ( !val.draw ) {
-                  // We're done drawing
-                }
+                  first = false;
               }
-            });
-          }
+              else if ( val.draw) {
+                if ( color == "rgba(0,0,0,1)" ) {
+                  ctx.globalCompositeOperation = "destination-out";
+                }
+                else {
+                  
+                }
+                console.log("Draw: "+val.x+","+val.y);
+                ctx.strokeStyle = color;
+                // console.log(prevx);
+                ctx.lineWidth = val.width;
+                ctx.lineCap = 'round';
+                ctx.moveTo(prevx,prevy);
+                ctx.lineTo(val.x,val.y);
+                ctx.stroke();
+                prevx = val.x;
+                prevy = val.y;
+              }
+              else if ( !val.draw ) {
+                // We're done drawing
+              }
+            }
+          });
 
           // Delete the last line contents
           db.collection('canvas').remove({id:id});

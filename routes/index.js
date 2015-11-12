@@ -39,7 +39,7 @@ router.get('/turtle', function(req, res, next) {
   var Canvas = require('canvas'),
   canvas = new Canvas(1900, 1000),
   ctx = canvas.getContext('2d');
-  req.db.collection('base64').findOne({path:'/otter'},function(err,data) {
+  req.db.collection('base64').findOne({path:'/turtle'},function(err,data) {
     if(data){
         var img = new Canvas.Image;//
         img.src = data.base64;
