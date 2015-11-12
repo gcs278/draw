@@ -28,6 +28,36 @@ a:visited {
 #size div {
   cursor: pointer;
 }
+#size div i {
+  position: absolute;
+  top: 0px;
+  left: 1px;
+}
+.size_selected {
+  position: absolute;
+  border: 1px solid #000;
+  height: 19px;
+  width: 19px;
+  background: transparent !important;
+}
+#large_selected,
+#medium_selected,
+#small_selected {
+  display: none;
+}
+#large_selected {
+  left: -2px;
+  top: -2px;
+}
+#medium_selected {
+  left: -5px;
+  top: -2px;
+}
+#small_selected {
+  top: -1px;
+  left: -10px;
+  width: 20px;
+}
 .page_select {
   position: absolute;
   left: 25px;

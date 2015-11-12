@@ -104,10 +104,13 @@ html
     div#size
         div.size_wrapper
             div#large
+            div.size_selected(id="large_selected")
         div.size_wrapper
             div#medium
+            div.size_selected(id="medium_selected")
         div.size_wrapper
             div#small
+            div.size_selected(id="small_selected")
     
     div.page_select
       if picture=='otter'
@@ -125,16 +128,6 @@ html
           img(src="/images/otter_small.png" id="otter-select")
         a(href="turtle")
           img(src="/images/turtle_small.png" id="turtle-select")
-    //- .colorbook
-    //-   button#dropdownMenu1.btn.btn-default.dropdown-toggle(type='button', data-toggle='dropdown', aria-haspopup='true', aria-expanded='true')
-    //-     | Blank Page
-    //-     span.caret
-    //-   ul.dropdown-menu(aria-labelledby='dropdownMenu1')
-    //-     li
-    //-       a(id='otter') Otter
-    //-     li
-    //-       a(id='otter') Blank Page          
-
 
     div#email
         a#email_button() Send Grant this picture

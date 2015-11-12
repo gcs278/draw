@@ -62,6 +62,7 @@ $(document).ready(function(){
 		{picker:true,theme: 'fontawesome'}).on('change', function() {
 		color = $('select[name="colorpicker"]').val();
 		$('.size_wrapper div').css("background",color);
+		$('.size_wrapper .size_selected').css("border-color",color);
 		ctx.globalCompositeOperation = "source-over";
 		$('canvas').css("cursor", "auto");
 
@@ -72,11 +73,13 @@ $(document).ready(function(){
 		console.log(color);
 		$('select[name="colorpicker"]').simplecolorpicker('selectColor',color);
 		$('.size_wrapper div').css("background",color);
+		$('.size_wrapper .size_selected').css("border-color",color);
 	}
 	else {
 		color = $('select[name="colorpicker"]').val();
 		$('.size_wrapper div').css("background-color",color);
 		Cookies.set("color",color);
+		$('.size_wrapper .size_selected').css("border-color",color);
 	}
 
 	// This demo depends on the canvas element
@@ -290,16 +293,27 @@ $(document).ready(function(){
 
 	});
 
+	$('#small_selected').show();
+
 	$('#large').click(function() {
 		lineWidth = 10;
+		$('#medium_selected').hide();
+		$('#small_selected').hide();
+		$('#large_selected').show();
 	});
 
 	$('#medium').click(function() {
 		lineWidth = 6;
+		$('#medium_selected').show();
+		$('#small_selected').hide();
+		$('#large_selected').hide();
 	});
 
 	$('#small').click(function() {
 		lineWidth = 3;
+		$('#small_selected').show();
+		$('#medium_selected').hide();
+		$('#large_selected').hide();
 	});
 
 	$('#eraser img').click(function() {
