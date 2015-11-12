@@ -321,7 +321,6 @@ $(document).ready(function(){
 			eraser = true;
 			ctx.globalCompositeOperation = "destination-out";
 			color = "rgba(0,0,0,1)";
-			lineWidth = 6;
 			$('canvas').css("cursor", "url('../images/eraser.png'), auto");
 			$("#eraser img").attr("src",'/images/pencil.png')
 		}
