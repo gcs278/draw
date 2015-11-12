@@ -254,6 +254,14 @@ $(document).ready(function(){
 			$('#confirm_clear').popup('hide');
 			socket.emit('clear_clicked',{path:window.location.pathname});
 			ctx.clearRect(0, 0, ctx.canvas.clientWidth, ctx.canvas.clientHeight);
+
+			if ( base_image ) {
+				if ( window.location.pathname == "/turtle")
+					ctx.drawImage(base_image, 200, 180);
+				else
+					ctx.drawImage(base_image, 0, 0);
+				
+			}
 		});
 		$('#confirm_clear #no').click(function() {
 			$('#confirm_clear').popup('hide');
@@ -295,11 +303,23 @@ $(document).ready(function(){
 	});
 
 	$('#eraser img').click(function() {
-		eraser = true;
-		ctx.globalCompositeOperation = "destination-out";
-		color = "rgba(0,0,0,1)";
-		lineWidth = 6;
-		$('canvas').css("cursor", "url('../images/eraser.png'), auto");
+		if ( !eraser ) {
+			eraser = true;
+			ctx.globalCompositeOperation = "destination-out";
+			color = "rgba(0,0,0,1)";
+			lineWidth = 6;
+			$('canvas').css("cursor", "url('../images/eraser.png'), auto");
+			$("#eraser img").attr("src",'/images/pencil.png')
+		}
+		else {
+			eraser = false;
+			ctx.globalCompositeOperation = "source-over";
+
+			color = Cookies.get("color");
+			$("#eraser img").attr("src",'/images/eraser.png');
+			$('canvas').css("cursor", "auto");
+
+		}
 	});
 
 	window.setInterval(function() {
