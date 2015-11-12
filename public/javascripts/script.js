@@ -281,7 +281,7 @@ $(document).ready(function(){
 		$('#confirm_send #yes').click(function() {
 			$.ajax( {
 				url: '/send',
-				data: {name:name}
+				data: {name:name,path:window.location.pathname}
 			}).done(function() {
 				$("#send").hide();
 				$("#sent").show();

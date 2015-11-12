@@ -69,8 +69,11 @@ router.get('/send', function(req, res) {
   if ( !req.query.name ) {
     res.render('error',{title:"Internal Server Error",message:"You gotta include a name"});
   }
+  else if ( !req.query.path ) {
+    res.render('error',{title:"Internal Server Error",message:"You gotta include a path"});
+  }
   else {
-    req.db.collection('base64').findOne({},function(err,data) {
+    req.db.collection('base64').findOne({path:'/'},function(err,data) {
       if(data){
         var base64 = data.base64.substring(data.base64.indexOf(",") + 1);
         var message = {
